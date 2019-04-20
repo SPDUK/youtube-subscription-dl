@@ -71,7 +71,7 @@ async function fetchVideos(auth) {
       auth,
       part: 'contentDetails'
     });
-    // destructure the uploads playlist (all channel videos) and the channel title
+    // destructure the uploads playlist (all channel videos)
     const {
       contentDetails: {
         relatedPlaylists: { uploads }
