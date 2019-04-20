@@ -4,24 +4,25 @@ const fs = require('fs');
 
 const historyPath = './history.json';
 // updates previous history if passed in, otherwise it's empty
-function updateHistory(retry = {}) {
+function updateHistory(last, retry = {}) {
   fs.writeFileSync(
     historyPath,
     JSON.stringify({
-      last: Date.now(),
+      last,
       retry
     })
   );
 }
 
 if (!fs.existsSync(historyPath)) {
-  updateHistory();
+  const yesterday = new Date(new Date().getTime() - 24 * 60 * 60 * 1000).getTime();
+  updateHistory(yesterday);
 }
 const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 
 // download a single video, if we can't download it then add it to the retry table
 function download(id) {
-  const dl = shell.exec(`youtube-dl youtu.be/${id}`);
+  const dl = shell.exec(`youtube-dl https://youtu.be/${id}`);
   if (dl.code) {
     history.retry[id].count = history.retry[id].count + 1 || 1;
   }
@@ -48,7 +49,7 @@ function retryDownload(retries) {
     }
   });
   // update history with new retries if we had to update them
-  updateHistory(history.retry);
+  updateHistory(Date.now(), history.retry);
 }
 
 async function fetchVideos(auth) {
@@ -91,7 +92,7 @@ async function fetchVideos(auth) {
   if (Object.keys(history.retry).length) {
     retryDownload(history.retry);
   } else {
-    updateHistory();
+    updateHistory(Date.now());
   }
 }
 
