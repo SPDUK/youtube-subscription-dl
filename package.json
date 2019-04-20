@@ -4,7 +4,7 @@
   "description": "Youtube subscription downloader",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "SPDUK",
   "license": "ISC",
@@ -25,6 +25,7 @@
     "eslint-plugin-promise": "^4.1.1",
     "eslint-plugin-react": "^7.12.4",
     "eslint-plugin-standard": "^4.0.0",
+    "jest": "^24.7.1",
     "prettier": "^1.17.0"
   }
 }
