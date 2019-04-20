@@ -1,6 +1,6 @@
 ## Requirements:
 
-#### [Node.js 10.15.13 (LTS) or higher](https://nodejs.org/en/)
+#### [Node.js 10.15.3 (LTS) or higher](https://nodejs.org/en/)
 
 #### [youtube-dl](http://ytdl-org.github.io/youtube-dl/download.html) installed.
 
@@ -24,7 +24,7 @@
 
 ### Set up youtube-dl.conf
 
-This will be your config file to set up where files are saved and what info you download, you can set it up however you want with many [options](https://github.com/ytdl-org/youtube-dl/blob/master/README.md#options) to pick from at the docs.
+This will be your config file to set up where files are saved and what extras you download, you can set it up however you want with many [options](https://github.com/ytdl-org/youtube-dl/blob/master/README.md#options) to pick from at the docs.
 
 ### If you want to use the config provided in this repo
 
@@ -32,7 +32,7 @@ it will:
 
 - Automatically output to the /Downloads folder on your PC
 - put them into their own folders per channel
-- Remember previous downloads and skip them
+- Remember previous downloads and skip them if they are reuploaded
 - Create .mkv files instead of the default (usually .webm)
 
 `mv ./youtube-dl.conf ~/.config/youtube-dl.conf` will move it to the correct folder on macos/linux, on windows you will have to create a file `%APPDATA%/youtube-dl/config.txt` and put the options in there.
