@@ -5,7 +5,7 @@ const readline = require('readline');
 const { google } = require('googleapis');
 
 const { OAuth2 } = google.auth;
-const fetchVideos = require('./fetchVideos');
+const { fetchVideos } = require('./fetchVideos');
 
 const ver = shell.exec('youtube-dl --version');
 // if there's an error code (not 0) throw an error because youtube-dl isn't installed

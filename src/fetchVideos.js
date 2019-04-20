@@ -3,7 +3,7 @@ const shell = require('shelljs');
 const fs = require('fs');
 
 const historyPath = './history.json';
-if (!fs.existsSync(historyPath)) {
+function updateHistory() {
   fs.writeFileSync(
     historyPath,
     JSON.stringify({
@@ -12,7 +12,20 @@ if (!fs.existsSync(historyPath)) {
     })
   );
 }
+
+if (!fs.existsSync(historyPath)) {
+  updateHistory();
+}
 const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
+
+function getNewVideos(video) {
+  const videoDate = new Date(video.snippet.publishedAt).getTime();
+  // if the item is newer than the last time we fetched videos
+  if (videoDate > history.last) {
+    const vidId = video.snippet.resourceId.videoId;
+    shell.exec(`youtube-dl youtu.be/${vidId}`);
+  }
+}
 
 async function fetchVideos(auth) {
   const service = google.youtube('v3');
@@ -40,18 +53,19 @@ async function fetchVideos(auth) {
       },
       snippet: { title }
     } = channelInfo.data.items[0];
-    console.log(title);
-    console.log(uploads);
 
-    const ups = await service.playlistItems.list({
+    const {
+      data: { items }
+    } = await service.playlistItems.list({
       playlistId: uploads,
       auth,
-      part: 'snippet,contentDetails'
+      part: 'snippet,contentDetails',
+      maxResults: 20 // 20? not many people upload more than 20 videos per day?
     });
-    const vidId = ups.data.items[0].snippet.resourceId.videoId;
-    // console.log(vidId);
-    // shell.exec(`youtube-dl youtu.be/${vidId}`); this works
+    items.forEach(getNewVideos);
+
+    updateHistory();
   }
 }
 
-module.exports = fetchVideos;
+module.exports = { fetchVideos, getNewVideos };
