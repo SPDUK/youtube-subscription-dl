@@ -16,12 +16,12 @@ if (ver.code) {
 }
 
 // If modifying these scopes, delete your previously saved credentials
-// at ~/.credentials/youtube-nodejs-quickstart.json
-const SCOPES = ['https://www.googleapis.com/auth/userinfo.profile'];
+// at ~/.credentials/youtube-subscription-dl.json
+const SCOPES = ['https://www.googleapis.com/auth/youtube.readonly'];
 const TOKEN_DIR = `${process.env.HOME ||
   process.env.HOMEPATH ||
   process.env.USERPROFILE}/.credentials/`;
-const TOKEN_PATH = `${TOKEN_DIR}youtube-nodejs-quickstart.json`;
+const TOKEN_PATH = `${TOKEN_DIR}youtube-subscription-dl.json`;
 
 // Load client secrets from a local file.
 fs.readFile('client_secret.json', function processClientSecrets(err, content) {
