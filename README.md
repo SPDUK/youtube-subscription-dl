@@ -41,12 +41,12 @@ it will:
 
 Run `npm install`
 
-Then run the script with `node index.js`
+Then run the script with `./yt-subs.sh` or `./yt-subs.bat`
 
-When you run `node index.js` it will ask you to log in, you'll be authorizing yourself with the project you just made, when you're done just paste the code into the console.
+When you run the command it will ask you to log in, you'll be authorizing yourself with the project you just made,when you're done just paste the code into the console. **This only happens the first time.**
 
 The first time you run it, it will download your subscriptions from the past 24 hours.
 
 Any times after that it will only download videos that have been uploaded since the last time it ran.
 
-Now you can set it up as a job to be ran whenever you feel like it, and it will automatically keep track of the history and not repeat downloads.
+You can set it up as a cron job to be ran whenever you feel like it, and it will automatically keep track of the history and not repeat downloads.
