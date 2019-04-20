@@ -3,12 +3,13 @@ const shell = require('shelljs');
 const fs = require('fs');
 
 const historyPath = './history.json';
-function updateHistory() {
+// updates previous history if passed in, otherwise it's empty
+function updateHistory(previous = []) {
   fs.writeFileSync(
     historyPath,
     JSON.stringify({
       last: Date.now(),
-      subscriptions: []
+      previous
     })
   );
 }
@@ -20,9 +21,11 @@ const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 
 function getNewVideos(video) {
   const videoDate = new Date(video.snippet.publishedAt).getTime();
-  // if the item is newer than the last time we fetched videos
-  if (videoDate > history.last) {
-    const vidId = video.snippet.resourceId.videoId;
+  const vidId = video.snippet.resourceId.videoId;
+
+  // if the item is newer than the last time we fetched videos and it has not been seen before
+  if (videoDate > history.last && !history.previous[vidId]) {
+    history.previous[vidId] = true;
     shell.exec(`youtube-dl youtu.be/${vidId}`);
   }
 }
@@ -64,7 +67,7 @@ async function fetchVideos(auth) {
     });
     items.forEach(getNewVideos);
 
-    updateHistory();
+    updateHistory(history.previous);
   }
 }
 
