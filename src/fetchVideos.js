@@ -1,5 +1,18 @@
 const { google } = require('googleapis');
 const shell = require('shelljs');
+const fs = require('fs');
+
+const historyPath = './history.json';
+if (!fs.existsSync(historyPath)) {
+  fs.writeFileSync(
+    historyPath,
+    JSON.stringify({
+      last: Date.now(),
+      subscriptions: []
+    })
+  );
+}
+const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 
 async function fetchVideos(auth) {
   const service = google.youtube('v3');
