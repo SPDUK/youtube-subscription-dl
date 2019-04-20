@@ -1,5 +1,5 @@
 // 2017/01/01
-const history = { last: 1483228800000, subscriptions: [] };
+const history = { last: 1483228800000 };
 
 function getNewVideos(publishedAt) {
   const videoDate = new Date(publishedAt).getTime();
