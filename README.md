@@ -41,7 +41,9 @@ it will:
 
 Run `npm install`
 
-Then run the script with `./yt-subs.sh` or `./yt-subs.bat`
+If on mac/linux, **make the script executable** `sudo chmod +x ./yt-subs.sh`
+
+Then run the script with `./yt-subs.sh` on mac/linux or `./yt-subs.bat` on windows
 
 When you run the command it will ask you to log in, you'll be authorizing yourself with the project you just made,when you're done just paste the code into the console. **This only happens the first time.**
 
