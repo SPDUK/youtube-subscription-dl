@@ -27,7 +27,11 @@ const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 function download(id) {
   const dl = shell.exec(`youtube-dl https://youtu.be/${id} --match-filter '!is_live'`);
   if (dl.code) {
-    history.retry[id].count = history.retry[id].count + 1 || 1;
+    // if the current id isn't already in history.retry, add it
+    if (!history.retry[id]) history.retry[id] = { count: 1 };
+    else {
+      history.retry[id].count = history.retry[id].count + 1 || 1;
+    }
   }
 }
 
@@ -69,7 +73,7 @@ async function getSubscriptions(auth, pageToken = '', allSubscriptions = []) {
   allSubscriptions.push(...data.items);
   // if there is another page of subscriptions to be looked at - repeat again
   if (data.nextPageToken) {
-    getSubscriptions(auth, data.nextPageToken, allSubscriptions);
+    await getSubscriptions(auth, data.nextPageToken, allSubscriptions);
   }
   return allSubscriptions;
 }
