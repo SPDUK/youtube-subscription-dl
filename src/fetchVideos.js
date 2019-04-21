@@ -2,6 +2,8 @@ const { google } = require('googleapis');
 const shell = require('shelljs');
 const fs = require('fs');
 
+const service = google.youtube('v3');
+
 const historyPath = `${__dirname}/history.json`;
 // updates previous history if passed in, otherwise it's empty
 function updateHistory(last, retry = {}) {
@@ -53,16 +55,27 @@ function retryDownload(retries) {
   updateHistory(Date.now(), history.retry);
 }
 
-async function fetchVideos(auth) {
-  const service = google.youtube('v3');
-  // get a list of all current subscriptions
-  const subscriptions = await service.subscriptions.list({
+async function getSubscriptions(auth, pageToken = '', allSubscriptions = []) {
+  // get data from the subscriptions
+  const { data } = await service.subscriptions.list({
     mine: true,
     auth,
-    part: 'snippet'
+    part: 'snippet',
+    maxResults: 50, // max is 50
+    order: 'alphabetical', // use alphabetical to always have the same order
+    pageToken
   });
-  // array of each channel you're subscribed to
-  const channels = subscriptions.data.items;
+  // push all the current subscriptions to the array of all subscriptions
+  allSubscriptions.push(...data.items);
+  // if there is another page of subscriptions to be looked at - repeat again
+  if (data.nextPageToken) {
+    getSubscriptions(auth, data.nextPageToken, allSubscriptions);
+  }
+  return allSubscriptions;
+}
+
+async function fetchVideos(auth) {
+  const channels = await getSubscriptions(auth);
 
   for (const channel of channels) {
     const id = channel.snippet.resourceId.channelId;
