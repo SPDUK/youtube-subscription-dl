@@ -2,7 +2,7 @@ const { google } = require('googleapis');
 const shell = require('shelljs');
 const fs = require('fs');
 
-const historyPath = './history.json';
+const historyPath = `${__dirname}/history.json`;
 // updates previous history if passed in, otherwise it's empty
 function updateHistory(last, retry = {}) {
   fs.writeFileSync(
@@ -21,8 +21,9 @@ if (!fs.existsSync(historyPath)) {
 const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 
 // download a single video, if we can't download it then add it to the retry table
+// hopefully skips currently live livestreams
 function download(id) {
-  const dl = shell.exec(`youtube-dl https://youtu.be/${id}`);
+  const dl = shell.exec(`youtube-dl https://youtu.be/${id} --match-filter '!is_live'`);
   if (dl.code) {
     history.retry[id].count = history.retry[id].count + 1 || 1;
   }

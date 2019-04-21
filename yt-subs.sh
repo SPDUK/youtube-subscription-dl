@@ -1,2 +1,2 @@
-#!/bin/bash
-node src/index.js
+DIR="$(cd "$(dirname "$0")" && pwd)"
+node $DIR/src/index.js
