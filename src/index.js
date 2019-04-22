@@ -1,14 +1,12 @@
 const fs = require('fs');
 const shell = require('shelljs');
 const path = require('path');
-
-const readline = require('readline');
-const notifier = require('node-notifier');
-
 const { google } = require('googleapis');
+const readline = require('readline');
+const logAndNotify = require('./logAndNotify');
+const { fetchVideos } = require('./fetchVideos');
 
 const { OAuth2 } = google.auth;
-const { fetchVideos } = require('./fetchVideos');
 
 const ver = shell.exec('youtube-dl --version');
 // if there's an error code (not 0) throw an error because youtube-dl isn't installed
@@ -16,19 +14,6 @@ if (ver.code) {
   throw new Error(
     'youtube-dl must be installed! https://ytdl-org.github.io/youtube-dl/download.html'
   );
-}
-
-// sends an OS notification and logs the same message to the console as a fallback
-// has to be awkwardly formatted
-function logAndNotify({ title, message }) {
-  notifier.notify({
-    title,
-    message
-  });
-  console.log(`${title}
-  
-${message}
-  `);
 }
 
 // If modifying these scopes, delete your previously saved credentials
