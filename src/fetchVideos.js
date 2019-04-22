@@ -31,6 +31,14 @@ function updateHistory(last, retry = {}) {
   }
 }
 
+// if the end of the stdout shows a message saying the video was already downloaded/seen, return true
+function checkIfVideoDownloaded(stdout) {
+  return (
+    stdout.substr(-38).includes('already been recorded in archive') ||
+    stdout.substr(-38).includes('already been downloaded and merged')
+  );
+}
+
 if (!fs.existsSync(historyPath)) {
   const yesterday = new Date(new Date().getTime() - 24 * 60 * 60 * 1000).getTime();
   updateHistory(yesterday);
@@ -41,23 +49,20 @@ const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 // hopefully skips currently live livestreams
 function download(id, channelTitle = '') {
   // loop that will re-connect the download even if the internet connection disconnects mid-download, continuing where it left off, even if the IP changes or wifi changes etc
-  const dl = shell.exec(
+  const { stdout, code } = shell.exec(
     `while ! youtube-dl https://youtu.be/${id} -c --match-filter '!is_live' --socket-timeout 10; do sleep 10; done`
   );
-  // if download has an error
-  if (dl.code) {
+  // if download has an error code
+  if (code) {
     // if the current id isn't already in history.retry, add it
     if (!history.retry[id]) history.retry[id] = { count: 1 };
     else {
       history.retry[id].count = history.retry[id].count + 1 || 1;
     }
   }
-  // if the last 38 chars of the output after trying to download says the video has been recorded already, return as we have no info to add to the messages
-  const duplicateMessages = [
-    'has already been downloaded and merged',
-    'has already been recorded in archive'
-  ];
-  if (duplicateMessages.includes(dl.stdout.substr(-38))) return;
+  // if the video has already been downloaded or is in the archive, don't add it to the notification info
+  if (checkIfVideoDownloaded(stdout)) return;
+
   newDownloadedVideos.count = newDownloadedVideos.count + 1 || 1;
   // add the channel's title to the list of names so we can show who we have new videos from in notifications
   // skip if it's a retry (since we only store the ID, not the full info)
