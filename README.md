@@ -1,8 +1,16 @@
+# Youtube-subscription-dl
+
+Use the youtube API to fetch your subscriptions automatically. Get an API key and then set the script as a cron job, no need to update lists of channels, just subscribe on youtube. Shows OS notifications when it finishes.
+
+---
+
 ## Requirements:
 
 #### [Node.js 10.15.3 (LTS) or higher](https://nodejs.org/en/)
 
 #### [youtube-dl](http://ytdl-org.github.io/youtube-dl/download.html) installed.
+
+#### If on linux `libnotify-bin` for OS notifications.
 
 ### Turn on the YouTube Data API
 
@@ -37,9 +45,11 @@ it will:
 
 `mv ./youtube-dl.conf ~/.config/youtube-dl.conf` will move it to the correct folder on macos/linux, on windows you will have to create a file `%APPDATA%/youtube-dl/config.txt` and put the options in there.
 
+---
+
 ## Running it for the first time
 
-Run `npm install`
+Run `npm install` to install dependencies
 
 If on mac/linux, **make the script executable** `sudo chmod +x ./yt-subs.sh`
 
