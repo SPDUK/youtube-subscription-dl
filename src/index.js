@@ -3,7 +3,7 @@ const shell = require('shelljs');
 const path = require('path');
 const { google } = require('googleapis');
 const readline = require('readline');
-const logAndNotify = require('./helpers/pluralize');
+const logAndNotify = require('./helpers/logAndNotify');
 const fetchVideos = require('./fetchVideos');
 
 const { OAuth2 } = google.auth;

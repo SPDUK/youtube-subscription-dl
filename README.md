@@ -49,7 +49,7 @@ it will:
 
 ## Running it for the first time
 
-Run `npm install` to install dependencies
+Run `npm install --production` to install dependencies
 
 If on mac/linux, **make the script executable** `sudo chmod +x ./yt-subs.sh`
 
