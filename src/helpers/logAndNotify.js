@@ -7,7 +7,6 @@ function logAndNotify({ title, message }) {
     message
   });
   console.log(`${title}
-  
 ${message}
   `);
 }

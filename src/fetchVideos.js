@@ -1,19 +1,34 @@
 const { google } = require('googleapis');
 const shell = require('shelljs');
 const fs = require('fs');
+const logAndNotify = require('./helpers/logAndNotify');
+const pluralize = require('./helpers/pluralize');
 
 const service = google.youtube('v3');
+// state for how many videos we downloaded this time
+const newDownloadedVideos = {
+  names: [],
+  count: 0
+};
 
 const historyPath = `${__dirname}/history.json`;
 // updates previous history if passed in, otherwise it's empty
+// gets created if it doesn't exist, and updated whenever we finish fetching videos
 function updateHistory(last, retry = {}) {
-  fs.writeFileSync(
-    historyPath,
-    JSON.stringify({
-      last,
-      retry
-    })
-  );
+  try {
+    fs.writeFileSync(
+      historyPath,
+      JSON.stringify({
+        last,
+        retry
+      })
+    );
+  } catch (err) {
+    logAndNotify({
+      title: `Could not create or edit file at ${historyPath}`,
+      message: err
+    });
+  }
 }
 
 if (!fs.existsSync(historyPath)) {
@@ -24,11 +39,12 @@ const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 
 // download a single video, if we can't download it then add it to the retry table
 // hopefully skips currently live livestreams
-function download(id) {
+function download(id, channelTitle = '') {
   // loop that will re-connect the download even if the internet connection disconnects mid-download, continuing where it left off, even if the IP changes or wifi changes etc
   const dl = shell.exec(
     `while ! youtube-dl https://youtu.be/${id} -c --match-filter '!is_live' --socket-timeout 10; do sleep 10; done`
   );
+  // if download has an error
   if (dl.code) {
     // if the current id isn't already in history.retry, add it
     if (!history.retry[id]) history.retry[id] = { count: 1 };
@@ -36,15 +52,32 @@ function download(id) {
       history.retry[id].count = history.retry[id].count + 1 || 1;
     }
   }
+  // if the last 38 chars of the output after trying to download says the video has been recorded already, return as we have no info to add to the messages
+  const duplicateMessages = [
+    'has already been downloaded and merged',
+    'has already been recorded in archive'
+  ];
+  if (duplicateMessages.includes(dl.stdout.substr(-38))) return;
+  newDownloadedVideos.count = newDownloadedVideos.count + 1 || 1;
+  // add the channel's title to the list of names so we can show who we have new videos from in notifications
+  // skip if it's a retry (since we only store the ID, not the full info)
+  if (channelTitle) newDownloadedVideos.names.push(channelTitle);
 }
 
 // checks if a video is new, if it is we download it
 function getNewVideos(video) {
-  const videoDate = new Date(video.snippet.publishedAt).getTime();
-  const id = video.snippet.resourceId.videoId;
+  // destructure publish time, channel title and the video id
+  const {
+    snippet: {
+      publishedAt,
+      channelTitle,
+      resourceId: { videoId }
+    }
+  } = video;
+  const videoDate = new Date(publishedAt).getTime();
 
   // if the item is newer than the last time we fetched videos and it has not been seen before
-  if (videoDate > history.last) download(id);
+  if (videoDate > history.last) download(videoId, channelTitle);
 }
 
 // object of retries that need to be done
@@ -115,6 +148,20 @@ async function fetchVideos(auth) {
   } else {
     updateHistory(Date.now());
   }
+  // get the first 3 names from the list of channel names and join them on comma with a space eg: "John, Billy, David"
+  const channelNames = newDownloadedVideos.names.slice(0, 3).join(', ');
+  // if we have more than 3 extra names, make a pretty message like "And 4 more.."
+  const { count } = newDownloadedVideos;
+  const additionalNames = count - 3 > 0 ? `and ${count - 3} others..` : '';
+  // if we have new videos downloaded, show the message, otherwise just show the title
+  const message = count
+    ? `${count} New ${pluralize(count, 'video')} from ${channelNames} ${additionalNames}`
+    : 'No new videos';
+
+  logAndNotify({
+    title: `Finished fetching youtube subscriptions`,
+    message
+  });
 }
 
-module.exports = { fetchVideos, getNewVideos };
+module.exports = fetchVideos;

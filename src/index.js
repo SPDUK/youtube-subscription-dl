@@ -3,17 +3,20 @@ const shell = require('shelljs');
 const path = require('path');
 const { google } = require('googleapis');
 const readline = require('readline');
-const logAndNotify = require('./logAndNotify');
-const { fetchVideos } = require('./fetchVideos');
+const logAndNotify = require('./helpers/pluralize');
+const fetchVideos = require('./fetchVideos');
 
 const { OAuth2 } = google.auth;
 
 const ver = shell.exec('youtube-dl --version');
 // if there's an error code (not 0) throw an error because youtube-dl isn't installed
 if (ver.code) {
-  throw new Error(
-    'youtube-dl must be installed! https://ytdl-org.github.io/youtube-dl/download.html'
-  );
+  const title = 'youtube-dl must be installed!';
+  logAndNotify({
+    title,
+    message: 'https://ytdl-org.github.io/youtube-dl/download.html'
+  });
+  throw title;
 }
 
 // If modifying these scopes, delete your previously saved credentials
