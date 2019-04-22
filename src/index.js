@@ -3,6 +3,8 @@ const shell = require('shelljs');
 const path = require('path');
 
 const readline = require('readline');
+const notifier = require('node-notifier');
+
 const { google } = require('googleapis');
 
 const { OAuth2 } = google.auth;
@@ -14,6 +16,19 @@ if (ver.code) {
   throw new Error(
     'youtube-dl must be installed! https://ytdl-org.github.io/youtube-dl/download.html'
   );
+}
+
+// sends an OS notification and logs the same message to the console as a fallback
+// has to be awkwardly formatted
+function logAndNotify({ title, message }) {
+  notifier.notify({
+    title,
+    message
+  });
+  console.log(`${title}
+  
+${message}
+  `);
 }
 
 // If modifying these scopes, delete your previously saved credentials
@@ -28,11 +43,14 @@ const PROJECT_PATH = path.resolve(__dirname, '..');
 // Load client secrets from a local file.
 fs.readFile(`${PROJECT_PATH}/client_secret.json`, function processClientSecrets(err, content) {
   if (err) {
-    console.log(`Error loading client secret file: ${err}`);
-    return;
+    logAndNotify({
+      title: 'Error finding client_secret.json',
+      message: `${err}\n Please read: https://github.com/SPDUK/youtube-subscription-dl#turn-on-the-youtube-data-api`
+    });
+  } else {
+    // Authorize a client with the loaded credentials, then call the YouTube API.
+    authorize(JSON.parse(content), fetchVideos);
   }
-  // Authorize a client with the loaded credentials, then call the YouTube API.
-  authorize(JSON.parse(content), fetchVideos);
 });
 
 /**
@@ -81,7 +99,10 @@ function getNewToken(oauth2Client, callback) {
     rl.close();
     oauth2Client.getToken(code, function(err, token) {
       if (err) {
-        console.log('Error while trying to retrieve access token', err);
+        logAndNotify({
+          title: 'Error confirming youtube API key',
+          message: `Error while trying to retrieve access token ${err}`
+        });
         return;
       }
       oauth2Client.credentials = token;
@@ -101,12 +122,24 @@ function storeToken(token) {
     fs.mkdirSync(TOKEN_DIR);
   } catch (err) {
     if (err.code !== 'EEXIST') {
+      logAndNotify({
+        title: `Error making folder ${TOKEN_DIR}`,
+        message: err
+      });
       throw err;
     }
   }
   fs.writeFile(TOKEN_PATH, JSON.stringify(token), err => {
-    if (err) throw err;
-    console.log(`Token stored to ${TOKEN_PATH}`);
+    if (err) {
+      logAndNotify({
+        title: `Error making file ${TOKEN_PATH}`,
+        message: err
+      });
+      throw err;
+    }
   });
-  console.log(`Token stored to ${TOKEN_PATH}`);
+  logAndNotify({
+    title: `You can now use youtube-subscription-dl!`,
+    message: `Token was stored to ${TOKEN_PATH}`
+  });
 }
