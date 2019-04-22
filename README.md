@@ -12,7 +12,7 @@ Use the youtube API to fetch your subscriptions automatically. Get an API key an
 
 #### If on linux `libnotify-bin` for OS notifications.
 
-### Turn on the YouTube Data API
+### Turn on the YouTube Data API (free, 10,000 queries/day)
 
 - Use [this wizard](https://console.developers.google.com/flows/enableapi?apiid=youtube) to create or select a project in the Google Developers Console and automatically turn on the API. Click Continue, then Go to credentials.
 
@@ -62,3 +62,23 @@ The first time you run it, it will download your subscriptions from the past 24 
 Any times after that it will only download videos that have been uploaded since the last time it ran.
 
 You can set it up as a cron job to be ran whenever you feel like it, and it will automatically keep track of the history and not repeat downloads.
+
+---
+
+## Other info
+
+- If your internet disconnects of your change IP during a download, it will reconnect every 10 seconds and try again until it works. If your internet is disconnected while making API calls it will error and stop working.
+
+- If the channel has a livestream or premiere it will skip them, the video that is uploaded after will be downloaded as expected.
+
+- The config by default will download the best quality, [but you can limit to your liking it with options like these](https://askubuntu.com/questions/486297/how-to-select-video-quality-from-youtube-dl)
+
+- If a file is partially downloaded it will continue where it left off.
+
+- If the video was not found,or had some youtube error, the script will retry the download 5 times (once when you first run it, then again before the script ends, each time the script runs after that it will try again, until a total of 5)
+
+- If you delete a video it won't re-download it, even if you delete the history.json file (which will re-download the last 24 hours as you won't have a history of the last download time)
+
+- If you delete both the history.json file and the archive.txt file it will download videos from the past 24hours, but not override files still.
+
+- Everything runs on your machine, nothing is shared with anyone but google, you spin up the server using your API keys and authorize your own account to yourself.
