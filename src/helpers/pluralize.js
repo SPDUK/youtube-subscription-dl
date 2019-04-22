@@ -1,1 +1,1 @@
-module.exports = (item, word) => (item.length === 1 ? word : `${word}s`);
+module.exports = (item, word) => (item === 1 ? word : `${word}s`);
