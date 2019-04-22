@@ -25,7 +25,10 @@ const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 // download a single video, if we can't download it then add it to the retry table
 // hopefully skips currently live livestreams
 function download(id) {
-  const dl = shell.exec(`youtube-dl https://youtu.be/${id} --match-filter '!is_live'`);
+  // loop that will re-connect the download even if the internet connection disconnects mid-download, continuing where it left off, even if the IP changes or wifi changes etc
+  const dl = shell.exec(
+    `while ! youtube-dl https://youtu.be/${id} -c --match-filter '!is_live' --socket-timeout 10; do sleep 10; done`
+  );
   if (dl.code) {
     // if the current id isn't already in history.retry, add it
     if (!history.retry[id]) history.retry[id] = { count: 1 };
