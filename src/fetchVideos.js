@@ -106,7 +106,7 @@ async function getSubscriptions(auth, pageToken = '', allSubscriptions = []) {
     mine: true,
     auth,
     part: 'snippet',
-    maxResults: 50, // max is 50
+    maxResults: 50, // max is 50, doesn't really matter as it's batched
     order: 'alphabetical', // use alphabetical to always have the same order
     pageToken
   });
@@ -119,40 +119,16 @@ async function getSubscriptions(auth, pageToken = '', allSubscriptions = []) {
   return allSubscriptions;
 }
 
-async function fetchVideos(auth) {
-  const channels = await getSubscriptions(auth);
-
-  for (const channel of channels) {
-    const id = channel.snippet.resourceId.channelId;
-    // get list of all channel uploads
-    const channelInfo = await service.channels.list({
-      id,
-      auth,
-      part: 'contentDetails'
-    });
-    // destructure the uploads playlist (all channel videos)
-    const {
-      contentDetails: {
-        relatedPlaylists: { uploads }
-      }
-    } = channelInfo.data.items[0];
-
-    const {
-      data: { items }
-    } = await service.playlistItems.list({
-      playlistId: uploads,
-      auth,
-      part: 'snippet',
-      maxResults: 20 // 20? not many people upload more than 20 videos per day?
-    });
-    items.forEach(getNewVideos);
-  }
+function retryAndUpdate() {
   // if there is current videos that have failed download - retry them this time
   if (Object.keys(history.retry).length) {
     retryDownload(history.retry);
   } else {
     updateHistory(Date.now());
   }
+}
+
+function notifyAfterCompletion() {
   // get the first 3 names from the list of channel names and join them on comma with a space eg: "John, Billy, David"
   const channelNames = newDownloadedVideos.names.slice(0, 3).join(', ');
   // if we have more than 3 extra names, make a pretty message like "And 4 more.."
@@ -167,6 +143,50 @@ async function fetchVideos(auth) {
     title: 'Finished downloading youtube subscriptions',
     message
   });
+}
+
+async function getUploads(channel, auth) {
+  const id = channel.snippet.resourceId.channelId;
+  // get list of all channel uploads
+  const channelInfo = await service.channels.list({
+    id,
+    auth,
+    part: 'contentDetails'
+  });
+  // destructure the uploads playlist (all channel videos)
+  const {
+    contentDetails: {
+      relatedPlaylists: { uploads }
+    }
+  } = channelInfo.data.items[0];
+
+  const {
+    data: { items }
+  } = await service.playlistItems.list({
+    playlistId: uploads,
+    auth,
+    part: 'snippet',
+    maxResults: 50 // 50 is the max
+  });
+  items.forEach(getNewVideos);
+}
+
+async function fetchVideos(auth) {
+  // get list of all subscriptions for the authorized user
+  const channels = await getSubscriptions(auth);
+
+  try {
+    // run all requests async at once, only retry and notify once all requests finish
+    // errors if a single one errors, so next run will download again as history won't be updated
+    await Promise.all(channels.map(channel => getUploads(channel, auth)));
+    retryAndUpdate();
+    notifyAfterCompletion();
+  } catch (error) {
+    logAndNotify({
+      title: 'Error downloading youtube subscriptions',
+      message: error.message
+    });
+  }
 }
 
 module.exports = fetchVideos;
