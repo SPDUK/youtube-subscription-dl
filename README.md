@@ -67,7 +67,7 @@ You can set it up as a cron job to be ran whenever you feel like it, and it will
 
 ## Other info
 
-- If your internet disconnects of your change IP during a download, it will reconnect every 10 seconds and try again until it works. If your internet is disconnected while making API calls it will error and stop working.
+- If your internet connection disconnects or your change IP during a download, youtube-dl will crash after 30 seconds and retry the next 5 times the script runs.
 
 - If the channel has a livestream or premiere it will skip them, the video that is uploaded after will be downloaded as expected.
 
