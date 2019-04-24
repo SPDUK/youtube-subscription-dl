@@ -13,7 +13,7 @@ const newDownloadedVideos = {
 
 const historyPath = `${__dirname}/history.json`;
 // updates previous history if passed in, otherwise it's empty
-// gets created if it doesn't exist, and updated whenever we finish fetching videos
+// gets created if it doesn't exist, and updated whenever we finish downloading videos
 function updateHistory(last, retry = {}) {
   try {
     fs.writeFileSync(
@@ -23,10 +23,10 @@ function updateHistory(last, retry = {}) {
         retry
       })
     );
-  } catch (err) {
+  } catch (error) {
     logAndNotify({
       title: `Could not create or edit file at ${historyPath}`,
-      message: err
+      message: error.message
     });
   }
 }
@@ -46,11 +46,11 @@ if (!fs.existsSync(historyPath)) {
 const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 
 // download a single video, if we can't download it then add it to the retry table
-// hopefully skips currently live livestreams
+// skips currently live livestreams
 function download(id, channelTitle = '') {
-  // loop that will re-connect the download even if the internet connection disconnects mid-download, continuing where it left off, even if the IP changes or wifi changes etc
+  // if the connection disconnects for 30 seconds it will cancel the download and retry next time
   const { stdout, code } = shell.exec(
-    `while ! youtube-dl https://youtu.be/${id} -c --match-filter '!is_live' --socket-timeout 10; do sleep 10; done`
+    `youtube-dl https://youtu.be/${id} -c --socket-timeout 30 --match-filter '!is_live'`
   );
   // if download has an error code
   if (code) {
@@ -89,8 +89,8 @@ function getNewVideos(video) {
 function retryDownload(retries) {
   const ids = Object.keys(retries);
   ids.forEach(id => {
-    // if we retried 4 times before, remove the id from the retry table
-    if (history.retry[id].count > 4) {
+    // if we retried 5 times total (6 including initial try), remove the id from the retry table
+    if (history.retry[id].count > 5) {
       delete history.retry[id];
     } else {
       download(id);
@@ -164,7 +164,7 @@ async function fetchVideos(auth) {
     : 'No new videos';
 
   logAndNotify({
-    title: `Finished fetching youtube subscriptions`,
+    title: 'Finished downloading youtube subscriptions',
     message
   });
 }

@@ -89,7 +89,7 @@ function getNewToken(oauth2Client, callback) {
       if (err) {
         logAndNotify({
           title: 'Error confirming youtube API key',
-          message: `Error while trying to retrieve access token ${err}`
+          message: `Error while trying to retrieve access token ${err.message}`
         });
         return;
       }
@@ -112,7 +112,7 @@ function storeToken(token) {
     if (err.code !== 'EEXIST') {
       logAndNotify({
         title: `Error making folder ${TOKEN_DIR}`,
-        message: err
+        message: err.message
       });
       throw err;
     }
@@ -121,13 +121,13 @@ function storeToken(token) {
     if (err) {
       logAndNotify({
         title: `Error making file ${TOKEN_PATH}`,
-        message: err
+        message: err.message
       });
       throw err;
     }
   });
   logAndNotify({
-    title: `You can now use youtube-subscription-dl!`,
+    title: `You can now use youtube-subscription-dl`,
     message: `Token was stored to ${TOKEN_PATH}`
   });
 }
