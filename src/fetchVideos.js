@@ -59,14 +59,16 @@ function download(id, channelTitle = '') {
     else {
       history.retry[id].count = history.retry[id].count + 1 || 1;
     }
-  }
-  // if the video has already been downloaded or is in the archive, don't add it to the notification info
-  if (checkIfVideoDownloaded(stdout)) return;
+    // if checking the download worked correctly without an error on the command
+  } else {
+    // if the video has already been downloaded or is in the archive, don't add it to the notification info
+    if (checkIfVideoDownloaded(stdout)) return;
 
-  newDownloadedVideos.count = newDownloadedVideos.count + 1 || 1;
-  // add the channel's title to the list of names so we can show who we have new videos from in notifications
-  // skip if it's a retry (since we only store the ID, not the full info)
-  if (channelTitle) newDownloadedVideos.names.push(channelTitle);
+    newDownloadedVideos.count = newDownloadedVideos.count + 1 || 1;
+    // add the channel's title to the list of names so we can show who we have new videos from in notifications
+    // skip if it's a retry (since we only store the ID, not the full info)
+    if (channelTitle) newDownloadedVideos.names.push(channelTitle);
+  }
 }
 
 // checks if a video is new, if it is we download it
