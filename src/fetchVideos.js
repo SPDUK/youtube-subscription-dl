@@ -70,7 +70,8 @@ function download(id, channelTitle = '') {
     newDownloadedVideos.count = newDownloadedVideos.count + 1 || 1;
     // add the channel's title to the list of names so we can show who we have new videos from in notifications
     // skip if it's a retry (since we only store the ID, not the full info)
-    if (channelTitle) newDownloadedVideos.names.push(channelTitle);
+    // replace any empty name with Unknown Channel
+    newDownloadedVideos.names.push(channelTitle || 'Unknown Channel');
   }
 }
 
@@ -135,11 +136,7 @@ function retryAndUpdate() {
 
 function notifyAfterCompletion() {
   // get the first 3 names from the list of channel names and join them on comma with a space eg: "John, Billy, David"
-  const channelNames = newDownloadedVideos.names
-    .slice(0, 3)
-    .join(', ')
-    .replace('', 'Unknown Channel'); // replace any empty names with unknown channel
-
+  const channelNames = newDownloadedVideos.names.slice(0, 3).join(', ');
   // if we have more than 3 extra names, make a pretty message like "And 4 more.."
   const { count } = newDownloadedVideos;
   const additionalNames = count - 3 > 0 ? `and ${count - 3} others..` : '';
