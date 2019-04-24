@@ -52,8 +52,9 @@ function download(id, channelTitle = '') {
   const { stdout, code } = shell.exec(
     `youtube-dl https://youtu.be/${id} -c --socket-timeout 30 --match-filter '!is_live'`
   );
-  // if download has an error code
-  if (code) {
+
+  // sometimes the error code may not exist at all if the download crashes, so if (code) won't work, we need to check if it isn't 0 (no errors)
+  if (code !== 0) {
     // if the current id isn't already in history.retry, add it
     if (!history.retry[id]) history.retry[id] = { count: 1 };
     else {
@@ -63,6 +64,8 @@ function download(id, channelTitle = '') {
   } else {
     // if the video has already been downloaded or is in the archive, don't add it to the notification info
     if (checkIfVideoDownloaded(stdout)) return;
+    // remove video from retries if it worked
+    if (history.retry[id]) delete history.retry[id];
 
     newDownloadedVideos.count = newDownloadedVideos.count + 1 || 1;
     // add the channel's title to the list of names so we can show who we have new videos from in notifications
@@ -132,7 +135,11 @@ function retryAndUpdate() {
 
 function notifyAfterCompletion() {
   // get the first 3 names from the list of channel names and join them on comma with a space eg: "John, Billy, David"
-  const channelNames = newDownloadedVideos.names.slice(0, 3).join(', ');
+  const channelNames = newDownloadedVideos.names
+    .slice(0, 3)
+    .join(', ')
+    .replace('', 'Unknown Channel'); // replace any empty names with unknown channel
+
   // if we have more than 3 extra names, make a pretty message like "And 4 more.."
   const { count } = newDownloadedVideos;
   const additionalNames = count - 3 > 0 ? `and ${count - 3} others..` : '';
