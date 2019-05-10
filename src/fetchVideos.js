@@ -50,7 +50,7 @@ const history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
 function download(id, channelTitle = '') {
   // if the connection disconnects for 30 seconds it will cancel the download and retry next time
   const { stdout, code } = shell.exec(
-    `youtube-dl https://youtu.be/${id} -c --socket-timeout 30 --match-filter '!is_live'`
+    `youtube-dl https://youtu.be/${id} -c --socket-timeout 30 --match-filter "!is_live"`
   );
 
   // sometimes the error code may not exist at all if the download crashes, so if (code) won't work, we need to check if it isn't 0 (no errors)
