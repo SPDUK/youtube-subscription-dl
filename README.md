@@ -53,7 +53,8 @@ Run `npm install --production` to install dependencies
 
 If on mac/linux, **make the script executable** `sudo chmod +x ./yt-subs.sh`
 
-Then run the script with `./yt-subs.sh` on mac/linux or `./yt-subs.bat` on windows
+Then run the script with `./yt-subs.sh` on mac/linux.
+On windows use git bash (or another bash emulator) to `./yt-subs.sh`
 
 When you run the command it will ask you to log in, you'll be authorizing yourself with the project you just made,when you're done just paste the code into the console. **This only happens the first time.**
 
