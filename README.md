@@ -51,7 +51,7 @@ Use the youtube API to fetch your subscriptions automatically. Get an API key an
 
   
 
-- Add an **Authorized redirect URI** of `http://localhost:8080`
+- Click the edit icon for the application and add an **Authorized redirect URI** of `http://localhost:8080`
 
   
 
@@ -94,7 +94,7 @@ it will:
 
   
 
-### To Save changes made to *youtube-dl.conf* or running it for the forst time
+### To Save changes made to *youtube-dl.conf* or running it for the first time
 
   
 
@@ -125,6 +125,7 @@ On windows use git bash (or another bash emulator) to `./yt-subs.sh`
   
 
 When you run the command it will ask you to log in, you'll be authorizing yourself with the project you just made, when you're done you should get a `This site can’t be reached` error. Copy the code form the URL of the page (Starting from after the `=` in " ***...?code=...*** " all the way to before the `&` in " ***...&scope=...*** "), just paste the code into the console. **This only happens the first time.**
+![copy](https://i.imgur.com/1hzkHMM.png)
 
   
 
